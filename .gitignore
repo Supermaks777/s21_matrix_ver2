@@ -1,5 +1,7 @@
-# Prerequisites
-*.d
+# my_exept
+*.gcno
+*.a
+report/
 
 # Object files
 *.o
