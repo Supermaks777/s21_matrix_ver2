@@ -1,0 +1,8 @@
+Running suite s21_determinant
+tests/unit_tests.c:676:P:core_of_determinant:s21_determinant_1:0: Passed
+tests/unit_tests.c:686:P:core_of_determinant:s21_determinant_2:0: Passed
+tests/unit_tests.c:698:P:core_of_determinant:s21_determinant_3:0: Passed
+tests/unit_tests.c:710:P:core_of_determinant:s21_determinant_4:0: Passed
+tests/unit_tests.c:722:P:core_of_determinant:s21_determinant_5:0: Passed
+Results for all suites run:
+100%: Checks: 5, Failures: 0, Errors: 0

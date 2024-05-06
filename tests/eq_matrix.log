@@ -1,0 +1,9 @@
+Running suite s21_eq_matrix
+tests/unit_tests.c:60:P:core_of_eq_matrix:s21_eq_matrix_1:0: Passed
+tests/unit_tests.c:72:P:core_of_eq_matrix:s21_eq_matrix_2:0: Passed
+tests/unit_tests.c:86:P:core_of_eq_matrix:s21_eq_matrix_3:0: Passed
+tests/unit_tests.c:98:P:core_of_eq_matrix:s21_eq_matrix_4:0: Passed
+tests/unit_tests.c:109:P:core_of_eq_matrix:s21_eq_matrix_5:0: Passed
+tests/unit_tests.c:122:P:core_of_eq_matrix:s21_eq_matrix_6:0: Passed
+Results for all suites run:
+100%: Checks: 6, Failures: 0, Errors: 0

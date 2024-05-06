@@ -112,3 +112,7 @@ test_another3: tests/matrix_test.c s21_matrix.a
 	rm -rf *.o s21_matrix_test.gcda
 	gcc $(FLAGS_CC_DEV) $(FLAGS_GL) $(FLAGS_GCOV) $^ -o s21_matrix_test $(FLAGS_CHECK) 
 	./s21_matrix_test
+
+valgrind_log:
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind_log.txt ./s21_matrix_test
+	grep ERROR valgrind_log.txt

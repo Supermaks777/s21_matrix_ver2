@@ -11,9 +11,11 @@
  */
 int s21_determinant(matrix_t *A, double *result) {
   double res = 0.0;
-  *result = 0.0;
   matrix_t temp = {0};
-  int err_code = s21_is_valid_matrix_full(A);
+
+  int err_code = (result == NULL) ? INCORRECT_MATRIX : OK;
+  if (err_code == OK) *result = 0.0;
+  if (err_code == OK) err_code = s21_is_valid_matrix_full(A);
   if (err_code == OK) err_code = s21_squar_size(A);
   if (err_code == OK) {
     if (A->rows == 1) res = A->matrix[0][0];

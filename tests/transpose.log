@@ -1,0 +1,8 @@
+Running suite s21_transpose
+tests/unit_tests.c:553:P:core_of_transpose:s21_transpose_1:0: Passed
+tests/unit_tests.c:564:P:core_of_transpose:s21_transpose_2:0: Passed
+tests/unit_tests.c:577:P:core_of_transpose:s21_transpose_3:0: Passed
+tests/unit_tests.c:597:P:core_of_transpose:s21_transpose_4:0: Passed
+tests/unit_tests.c:621:P:core_of_transpose:s21_transpose_5:0: Passed
+Results for all suites run:
+100%: Checks: 5, Failures: 0, Errors: 0

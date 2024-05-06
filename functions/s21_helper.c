@@ -11,9 +11,6 @@
  * @retval 2 - CALCULATION_ERROR.
  */
 int s21_eq_size(const matrix_t *A, const matrix_t *B) {
-  printf("s21_eq_size.check_1: %d\n", A->rows != B->rows);
-  printf("s21_eq_size.check_2: %d\n", A->columns != B->columns);
-  printf("s21_eq_size.check_3: %d\n", A->rows != B->rows || A->columns != B->columns);
   return (A->rows != B->rows || A->columns != B->columns) ? CALCULATION_ERROR
                                                           : OK;
 }
@@ -31,41 +28,7 @@ int s21_squar_size(const matrix_t *source) {
   return (source->rows != source->columns) ? CALCULATION_ERROR : OK;
 }
 
-/**
- * @brief проверяет равенство двух чисел с заданной точностью
- *
- * @param val_1 первое число (double)
- * @param val_2 второе число (double)
- * @return результат проверки (int)
- * @retval 0 - числа НЕ равны.
- * @retval 1 - числа равны.
- */
-int s21_eq_element(double val_1, double val_2) {
-  return fabs(val_1 - val_2) < S21_PRECISION;
-}
 
-/**
- * @brief проверяет равенство содержимого матриц
- *
- * @param A первая матрица (matrix_t)
- * @param B вторая матрица (matrix_t)
- * @return результат проверки (int)
- * @retval 0 - содержимые матриц НЕ равны.
- * @retval 1 - содержимые матриц равны.
- */
-int s21_eq_content(const matrix_t *A, const matrix_t *B) {
-  int result = SUCCESS;
-  if (s21_eq_size(A, B)) result = FAILURE;
-  printf("s21_eq_content.result_before_cmp: %d\n", result);
-  for (int i = 0; i < A->rows && result == SUCCESS; i++) {
-    for (int j = 0; j < A->columns && result == SUCCESS; j++) {
-      result = s21_eq_element(A->matrix[i][j], B->matrix[i][j]);
-      printf("s21_eq_content.cpr: %f --- %f\n", A->matrix[i][j], B->matrix[i][j]);
-    }
-  }
-  printf("s21_eq_content.result_after_cmp: %d\n", result);
-  return result;
-}
 
 /**
  * @brief проверяет совместимость размеров матрицы (число столбцов одной матрицы
@@ -167,13 +130,11 @@ void s21_initialize_matrix(matrix_t *source, double start, double step) {
  * @retval 2 - CALCULATION_ERROR.
  */
 int s21_is_valid_matrix_mini(const matrix_t *source) {
-  int err_code = (!source) ? INCORRECT_MATRIX : OK;
-  if (err_code == OK) err_code = (!source->rows) ? INCORRECT_MATRIX : OK;
-  // if (err_code == OK) err_code = (source->rows != source->rows) ? INCORRECT_MATRIX : OK;
-  if (err_code == OK) err_code = (source->rows < 1) ? INCORRECT_MATRIX : OK;
-  if (err_code == OK) err_code = (!source->matrix) ? INCORRECT_MATRIX : OK;
+  int err_code = (source == NULL) ? INCORRECT_MATRIX : OK;
+  if (err_code == OK) err_code = (source->rows > 0) ? OK : INCORRECT_MATRIX;
+  if (err_code == OK) err_code = (source->matrix == NULL) ? INCORRECT_MATRIX : OK;
   for (int i = 0; err_code == OK && i < source->rows; i++)
-    err_code = (!source->matrix[i]) ? INCORRECT_MATRIX : OK;
+    err_code = (source->matrix[i] == NULL) ? INCORRECT_MATRIX : OK;
   return err_code;
 }
 
@@ -189,10 +150,7 @@ int s21_is_valid_matrix_mini(const matrix_t *source) {
  */
 int s21_is_valid_matrix_midi(const matrix_t *source) {
   int err_code = s21_is_valid_matrix_mini(source);
-  if (err_code == OK) err_code = (!source->columns) ? INCORRECT_MATRIX : OK;
-    err_code = (source->columns != source->columns) ? INCORRECT_MATRIX : OK;
-  if (err_code == OK)
-  if (err_code == OK) err_code = (source->columns < 1) ? INCORRECT_MATRIX : OK;
+  if (err_code == OK) err_code = (source->columns > 0) ? OK : INCORRECT_MATRIX;
   return err_code;
 }
 
@@ -207,11 +165,9 @@ int s21_is_valid_matrix_midi(const matrix_t *source) {
  */
 int s21_is_valid_matrix_full(const matrix_t *source) {
   int err_code = s21_is_valid_matrix_midi(source);
-  if (err_code == OK) {
-    for (int i = 0; err_code == OK && i < source->rows; i++) {
-      for (int j = 0; err_code == OK && j < source->columns; j++) {
-        err_code = s21_is_valid_element(source->matrix[i][j]);
-      }
+  for (int i = 0; err_code == OK && i < source->rows; i++) {
+    for (int j = 0; err_code == OK && j < source->columns; j++) {
+      err_code = s21_is_valid_element(source->matrix[i][j]);
     }
   }
   return err_code;
@@ -240,7 +196,7 @@ int s21_is_valid_element(double val) {
  * @retval 2 - CALCULATION_ERROR.
  */
 int s21_is_valid_result_ptr(const matrix_t *source) {
-  return (!source) ? INCORRECT_MATRIX : OK;
+  return (source == NULL) ? INCORRECT_MATRIX : OK;
 }
 
 /**
@@ -303,20 +259,20 @@ double s21_main_diagonal_multiple(const matrix_t *source) {
 }
 
 //////////////////функции для отладки///////////////////////////
-/**
- * @brief вывод на экран матрицы
- *
- * @param source исходная матрица
- */
-void s21_print_matrix(const matrix_t *source) {
-  if (!s21_is_valid_matrix_midi(source)) {
-    for (int i = 0; i < source->rows; i++) {
-      for (int j = 0; j < source->columns; j++)
-        printf("%-10f\t", source->matrix[i][j]);
-      printf("\n");
-    }
-  }
-}
+// /**
+//  * @brief вывод на экран матрицы
+//  *
+//  * @param source исходная матрица
+//  */
+// void s21_print_matrix(const matrix_t *source) {
+//   if (!s21_is_valid_matrix_midi(source)) {
+//     for (int i = 0; i < source->rows; i++) {
+//       for (int j = 0; j < source->columns; j++)
+//         printf("%-10f\t", source->matrix[i][j]);
+//       printf("\n");
+//     }
+//   }
+// }
 
 // /**
 //  * @brief корректирует индекс (концепция бесконечной склейки)
@@ -378,18 +334,54 @@ void s21_print_matrix(const matrix_t *source) {
 //   return err_code;
 // }
 
-/**
- * @brief заполняет матрицу псевдослучайными числами
- *
- * @param source исходная матрица
- */
-void s21_initialize_matrix_random(matrix_t *source, int shift) {
-  srand(shift);
-  if (!s21_is_valid_matrix_full(source)) {
-    for (int i = 0; i < source->rows; i++) {
-      for (int j = 0; j < source->columns; j++) {
-        source->matrix[i][j] = rand() % 10000 / 100.0;
-      }
-    }
-  }
-}
+// /**
+//  * @brief заполняет матрицу псевдослучайными числами
+//  *
+//  * @param source исходная матрица
+//  */
+// void s21_initialize_matrix_random(matrix_t *source, int shift) {
+//   srand(shift);
+//   if (!s21_is_valid_matrix_full(source)) {
+//     for (int i = 0; i < source->rows; i++) {
+//       for (int j = 0; j < source->columns; j++) {
+//         source->matrix[i][j] = rand() % 10000 / 100.0;
+//       }
+//     }
+//   }
+// }
+
+// /**
+//  * @brief проверяет равенство двух чисел с заданной точностью
+//  *
+//  * @param val_1 первое число (double)
+//  * @param val_2 второе число (double)
+//  * @return результат проверки (int)
+//  * @retval 0 - числа НЕ равны.
+//  * @retval 1 - числа равны.
+//  */
+// int s21_eq_element(double val_1, double val_2) {
+//   return fabs(val_1 - val_2) < S21_PRECISION;
+// }
+
+// /**
+//  * @brief проверяет равенство содержимого матриц
+//  *
+//  * @param A первая матрица (matrix_t)
+//  * @param B вторая матрица (matrix_t)
+//  * @return результат проверки (int)
+//  * @retval 0 - содержимые матриц НЕ равны.
+//  * @retval 1 - содержимые матриц равны.
+//  */
+// int s21_eq_content(const matrix_t *A, const matrix_t *B) {
+//   int result = SUCCESS;
+//   if (s21_eq_size(A, B)) result = FAILURE;
+//   // printf("s21_eq_content.result_before_cmp: %d\n", result);
+//   for (int i = 0; i < A->rows && result == SUCCESS; i++) {
+//     for (int j = 0; j < A->columns && result == SUCCESS; j++) {
+//       result = s21_eq_element(A->matrix[i][j], B->matrix[i][j]);
+//       // printf("s21_eq_content.cpr: %f --- %f\n", A->matrix[i][j], B->matrix[i][j]);
+//     }
+//   }
+//   // printf("s21_eq_content.result_after_cmp: %d\n", result);
+//   return result;
+// }

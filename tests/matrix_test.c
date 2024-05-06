@@ -810,10 +810,10 @@ START_TEST(complements_4) {
   s21_create_matrix(1, 1, &C);
   A.matrix[0][0] = 984.1238;
   C.matrix[0][0] = 984.1238;
-  printf("\n\n!!!\n\n");
+  // printf("\n\n!!!\n\n");
   int res = s21_calc_complements(&A, &B);
   int res2 = s21_eq_matrix(&B, &C);
-  printf("\n\n!!!\n\n");
+  // printf("\n\n!!!\n\n");
   ck_assert_int_eq(res2, 0);
   ck_assert_int_eq(res, 0);
 

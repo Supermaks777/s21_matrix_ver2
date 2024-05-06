@@ -1,0 +1,9 @@
+Running suite s21_mult_number
+tests/unit_tests.c:347:P:core_of_mult_number:s21_mult_number_1:0: Passed
+tests/unit_tests.c:359:P:core_of_mult_number:s21_mult_number_2:0: Passed
+tests/unit_tests.c:372:P:core_of_mult_number:s21_mult_number_3:0: Passed
+tests/unit_tests.c:387:P:core_of_mult_number:s21_mult_number_4:0: Passed
+tests/unit_tests.c:405:P:core_of_mult_number:s21_mult_number_5:0: Passed
+tests/unit_tests.c:430:P:core_of_mult_number:s21_mult_number_6:0: Passed
+Results for all suites run:
+100%: Checks: 6, Failures: 0, Errors: 0
