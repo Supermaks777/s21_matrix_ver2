@@ -10,24 +10,18 @@
  * @retval 0 - FAILURE.
  * @retval 1 - SUCCESS.
  */
-
 int s21_eq_matrix(matrix_t *A, matrix_t *B) {
-  int result = s21_is_valid_matrix_midi(A) == OK ? SUCCESS : FAILURE;
-  if (result == SUCCESS) result = s21_is_valid_matrix_midi(B) == OK ? SUCCESS : FAILURE;
-  if (result == SUCCESS) result = s21_eq_size(A, B) == OK ? SUCCESS : FAILURE;
-  for (int i = 0; result == SUCCESS && i < A->rows; i++) {
-    for (int j = 0; result == SUCCESS && j < A->columns; j++) {
-      result = fabs(A->matrix[i][j] - B->matrix[i][j]) < S21_PRECISION ? SUCCESS : FAILURE;
+  int result = SUCCESS;
+  if (!A || !B || (A->rows != B->rows) || (A->columns != B->columns)) {
+    result = FAILURE;
+  } else {
+    for (int i = 0; result != FAILURE && i < A->rows; i++) {
+      for (int j = 0; result != FAILURE && j < A->columns; j++) {
+        result =
+            fabs(A->matrix[i][j] - B->matrix[i][j]) < 1e-07 ? SUCCESS : FAILURE;
+      }
     }
   }
   return result;
 }
-
-
-// int s21_eq_matrix(matrix_t *A, matrix_t *B) {
-//   int result = !s21_is_valid_matrix_midi(&A) ? SUCCESS : FAILURE;
-//   if (result == SUCCESS) result = !s21_is_valid_matrix_midi(&B) ? SUCCESS : FAILURE;
-//   if (result == SUCCESS) result = s21_eq_content(&A, &B) ? SUCCESS : FAILURE;
-//   return result;
-// }
 

@@ -11,7 +11,7 @@
  */
 int s21_determinant(matrix_t *A, double *result) {
   int err_code = OK;
-  if (A != NULL && A->matrix != NULL && A->rows > 0 && A->columns > 0) {
+  if (valid_matrix(A)) {
     if (A->rows == A->columns) {
       *result = 0.0;
       err_code = get_determinant(A, result);

@@ -255,6 +255,11 @@ int calc_minor_determinant(matrix_t *A, double *determinant) {
   return err_code;
 }
 
+int valid_matrix(matrix_t *source) {
+  return (source != NULL && source->matrix != NULL && source->rows > 0 &&
+          source->columns > 0);
+}
+
 /**
  * @brief создает копию матрицы
  *

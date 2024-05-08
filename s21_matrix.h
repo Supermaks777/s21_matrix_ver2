@@ -56,6 +56,8 @@ void s21_initialize_matrix_random(matrix_t *source, int shift);
 int get_determinant(matrix_t *A, double *determinant);
 void calc_minor_matrix(matrix_t *A, int row, int column, matrix_t *M);
 int calc_minor_determinant(matrix_t *A, double *determinant);
+int valid_matrix(matrix_t *source);
+int get_calc_complements(matrix_t *A, matrix_t *result);
 
 
 #endif
