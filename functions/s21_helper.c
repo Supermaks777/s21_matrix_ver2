@@ -16,21 +16,6 @@ int s21_eq_size(const matrix_t *A, const matrix_t *B) {
 }
 
 /**
- * @brief проверяет что матрица квадратная
- *
- * @param source указатель на проверяемую матрицу (matrix_t *)
- * @return результат проверки (int)
- * @retval 0 - OK.
- * @retval 1 - INCORRECT_MATRIX.
- * @retval 2 - CALCULATION_ERROR.
- */
-int s21_squar_size(const matrix_t *source) {
-  return (source->rows != source->columns) ? CALCULATION_ERROR : OK;
-}
-
-
-
-/**
  * @brief проверяет совместимость размеров матрицы (число столбцов одной матрицы
  * равно число строк другой и наоборот)
  *
@@ -46,80 +31,6 @@ int s21_compatibility_size(const matrix_t *A, const matrix_t *B) {
 }
 
 /**
- * @brief рассчитывает минор (определитель субматрицы, т.е. усеченной по
- * выбранным строке и столбцу)
- *
- * @param source структура с исходной матрицей (matrix_t *)
- * @param row выбранная строка (int)
- * @param column выбранный столбец (int)
- * @param result структура с исходной матрицей (double *)
- * @return код ошибки (int)
- * @retval 0 - OK.
- * @retval 1 - INCORRECT_MATRIX.
- * @retval 2 - CALCULATION_ERROR.
- */
-int s21_get_minor(const matrix_t *source, int row, int column, double *result) {
-  double determinant = 0.0;
-  matrix_t sub_matrix = {0};
-  int err_code =
-      s21_create_sub_matrix(source, row, column, source->rows - 1, &sub_matrix);
-  if (err_code == OK) err_code = s21_determinant(&sub_matrix, &determinant);
-  s21_remove_matrix(&sub_matrix);
-  if (err_code == OK) err_code = s21_is_valid_element(determinant);
-  if (err_code == OK) *result = determinant;
-  return err_code;
-}
-
-/**
- * @brief создает субматрицу, за исключением указанного столбца и строки
- *
- * @param source исходная матрица (matrix_t *)
- * @param row_del строка заданного элемента исходной матрицы (int)
- * @param column_del столбец заданного элемента исходной матрицы (int)
- * @param size разрер субматрицы матрицы (int)
- * @param result указатель результат (*result)
- * @return код ошибки (int)
- */
-int s21_create_sub_matrix(const matrix_t *source, int row_del, int column_del,
-                          int size, matrix_t *result) {
-  int err_code = s21_create_matrix(size, size, result);
-  if (err_code == OK) {
-    for (int row_src = 0, row_res = 0; row_src <= size; row_src++) {
-      if (row_src == row_del) continue;
-      for (int column_src = 0, column_res = 0; column_src <= size;
-           column_src++) {
-        if (column_src == column_del) continue;
-        result->matrix[row_res][column_res] =
-            source->matrix[row_src][column_src];
-        column_res++;
-      }
-      row_res++;
-    }
-  }
-  return err_code;
-}
-
-/**
- * @brief заполняет матрицу арифметической последовательностью, заданной началом
- * и шагом
- *
- * @param source исходная матрица
- * @param start значение первого элемента матрицы (double)
- * @param step шаг арифметической последовательности (double)
- */
-void s21_initialize_matrix(matrix_t *source, double start, double step) {
-  if (!s21_is_valid_matrix_full(source)) {
-    double current_value = start;
-    for (int i = 0; i < source->rows; i++) {
-      for (int j = 0; j < source->columns; j++) {
-        source->matrix[i][j] = current_value;
-        current_value += step;
-      }
-    }
-  }
-}
-
-/**
  * @brief проверяет валидность матрицы.
  * проверяемые признаки: указатель на структуру, размеры матрицы, указатель на
  * матрицу, указатели строк
@@ -132,7 +43,8 @@ void s21_initialize_matrix(matrix_t *source, double start, double step) {
 int s21_is_valid_matrix_mini(const matrix_t *source) {
   int err_code = (source == NULL) ? INCORRECT_MATRIX : OK;
   if (err_code == OK) err_code = (source->rows > 0) ? OK : INCORRECT_MATRIX;
-  if (err_code == OK) err_code = (source->matrix == NULL) ? INCORRECT_MATRIX : OK;
+  if (err_code == OK)
+    err_code = (source->matrix == NULL) ? INCORRECT_MATRIX : OK;
   for (int i = 0; err_code == OK && i < source->rows; i++)
     err_code = (source->matrix[i] == NULL) ? INCORRECT_MATRIX : OK;
   return err_code;
@@ -209,8 +121,11 @@ int s21_is_valid_result_ptr(const matrix_t *source) {
 int get_determinant(matrix_t *A, double *determinant) {
   int err_code = OK;
 
-  if (A->columns == 1 && A->rows == 1) *determinant = A->matrix[0][0];
-  else if (A->columns == 2 && A->rows == 2) *determinant = A->matrix[0][0] * A->matrix[1][1] - A->matrix[1][0] * A->matrix[0][1];
+  if (A->columns == 1 && A->rows == 1)
+    *determinant = A->matrix[0][0];
+  else if (A->columns == 2 && A->rows == 2)
+    *determinant =
+        A->matrix[0][0] * A->matrix[1][1] - A->matrix[1][0] * A->matrix[0][1];
   else {
     for (int j = 0; j < A->columns && err_code == OK; j++) {
       double det_minor_j = 0.0;
@@ -218,9 +133,11 @@ int get_determinant(matrix_t *A, double *determinant) {
 
       err_code = s21_create_matrix(A->rows - 1, A->columns - 1, &M_j);
       if (err_code == OK) {
-        calc_minor_matrix(A, 0, j, &M_j);
-        err_code = calc_minor_determinant(&M_j, &det_minor_j);
-        if (err_code == OK) *determinant += pow(-1.0, 1 + (j + 1)) * A->matrix[0][j] * det_minor_j;
+        get_minor_matrix(A, 0, j, &M_j);
+        err_code = get_minor_determinant(&M_j, &det_minor_j);
+        if (err_code == OK)
+          *determinant +=
+              pow(-1.0, 1 + (j + 1)) * A->matrix[0][j] * det_minor_j;
       }
       s21_remove_matrix(&M_j);
     }
@@ -228,8 +145,12 @@ int get_determinant(matrix_t *A, double *determinant) {
   return err_code;
 }
 
-
-void calc_minor_matrix(matrix_t *source, int row, int column, matrix_t *result) {
+/// @brief заполняет субматрицу
+/// @param source исходная матрица (matrix_t *)
+/// @param row строка исключение (int)
+/// @param column столбец исключение (int)
+/// @param result матрица для записи результата (matrix_t *)
+void get_minor_matrix(matrix_t *source, int row, int column, matrix_t *result) {
   int minor_row = 0, minor_col = 0;
 
   for (int i = 0; i < source->rows; i++) {
@@ -245,93 +166,116 @@ void calc_minor_matrix(matrix_t *source, int row, int column, matrix_t *result) 
   }
 }
 
-int calc_minor_determinant(matrix_t *A, double *determinant) {
+/// @brief расчитывает определитель минорной матрицы
+/// @param A исходная матрица (matrix_t *)
+/// @param determinant указатель для записи результата
+/// @return код ошибки
+int get_minor_determinant(matrix_t *A, double *determinant) {
   int err_code = OK;
   if (A != NULL && A->matrix != NULL && A->rows > 0 && A->columns > 0) {
-    if (A->rows == 1 && A->columns == 1) *determinant = A->matrix[0][0];
-    else if (A->rows == 2 && A->columns == 2) *determinant = A->matrix[0][0] * A->matrix[1][1] - A->matrix[0][1] * A->matrix[1][0];
-    else err_code = get_determinant(A, determinant);
-  } else err_code = INCORRECT_MATRIX;
+    if (A->rows == 1 && A->columns == 1)
+      *determinant = A->matrix[0][0];
+    else if (A->rows == 2 && A->columns == 2)
+      *determinant =
+          A->matrix[0][0] * A->matrix[1][1] - A->matrix[0][1] * A->matrix[1][0];
+    else
+      err_code = get_determinant(A, determinant);
+  } else
+    err_code = INCORRECT_MATRIX;
   return err_code;
 }
 
+/// @brief проверяет корректность исходных данных
+/// @param source проверяемая матрица (matrix_t *)
+/// @return результат проверки
 int valid_matrix(matrix_t *source) {
   return (source != NULL && source->matrix != NULL && source->rows > 0 &&
           source->columns > 0);
 }
 
-/**
- * @brief создает копию матрицы
- *
- * @param source структура с исходной матрицей (matrix_t *)
- * @param result структура с исходной матрицей (matrix_t *)
- * @return код ошибки (int)
- * @retval 0 - OK.
- * @retval 1 - INCORRECT_MATRIX.
- * @retval 2 - CALCULATION_ERROR.
- */
-int s21_copy_matrix(const matrix_t *source, matrix_t *result) {
-  int err_code = s21_create_matrix(source->rows, source->rows, result);
-  if (err_code == OK)
-    for (int i = 0; i < source->rows; i++) {
-      for (int j = 0; j < source->rows; j++) {
-        result->matrix[i][j] = source->matrix[i][j];
-      }
+/// @brief проверяет равенство размером сравниваемых матриц
+/// @param A проверяемая матрица (matrix_t *)
+/// @param B эталонная матрица (matrix_t *)
+/// @return результат сравнения
+int valid_eq_matrixes(matrix_t *A, matrix_t *B) {
+  return (A->rows == B->rows && A->columns == B->columns);
+}
+
+/// @brief создает матрицу дополнений
+/// @param A исходная матрица (matrix_t *)
+/// @param result результирующая матрица (matrix_t *)
+/// @return код результата
+int get_calc_complements(matrix_t *A, matrix_t *result) {
+  int err_code = OK;
+  matrix_t minor_ij = {0};
+
+  err_code = s21_create_matrix(A->rows - 1, A->columns - 1, &minor_ij);
+  for (int i = 0; i < A->rows && err_code == OK; i++) {
+    for (int j = 0; j < A->columns && err_code == OK; j++) {
+      double determinant = 0.0;
+      get_minor_matrix(A, i, j, &minor_ij);
+      err_code = get_minor_determinant(&minor_ij, &determinant);
+
+      if (err_code == OK) result->matrix[i][j] = pow(-1.0, i + j) * determinant;
     }
+  }
+  s21_remove_matrix(&minor_ij);
   return err_code;
 }
 
+//////////////////функции для отладки///////////////////////////
+// /**
+//  * @brief вывод на экран матрицы
+//  *
+//  * @param source исходная матрица
+//  */
+// void s21_print_matrix(const matrix_t *source) {
+//   if (!s21_is_valid_matrix_midi(source)) {
+//     for (int i = 0; i < source->rows; i++) {
+//       for (int j = 0; j < source->columns; j++)
+//         printf("%-10f\t", source->matrix[i][j]);
+//       printf("\n");
+//     }
+//   }
+// }
+
+// /**
+//  * @brief заполняет матрицу псевдослучайными числами
+//  *
+//  * @param source исходная матрица
+//  */
+// void s21_initialize_matrix_random(matrix_t *source, int shift) {
+//   srand(shift);
+//   if (!s21_is_valid_matrix_full(source)) {
+//     for (int i = 0; i < source->rows; i++) {
+//       for (int j = 0; j < source->columns; j++) {
+//         source->matrix[i][j] = rand() % 10000 / 100.0;
+//       }
+//     }
+//   }
+// }
+
 /**
- * @brief преобразует матрицу методом гауса в треугольную
+ * @brief заполняет матрицу арифметической последовательностью, заданной началом
+ * и шагом
  *
- * @param source структура с исходной матрицей (matrix_t *)
- * @return код ошибки (int)
- * @retval 0 - OK.
- * @retval 1 - INCORRECT_MATRIX.
- * @retval 2 - CALCULATION_ERROR.
+ * @param source исходная матрица
+ * @param start значение первого элемента матрицы (double)
+ * @param step шаг арифметической последовательности (double)
  */
-int s21_gauss_elimination(const matrix_t *source) {
-  for (int k = 0; k < source->rows - 1; k++) {
-    for (int i = k + 1; i < source->rows; i++) {
-      double factor = source->matrix[i][k] / source->matrix[k][k];
-      for (int j = k; j < source->rows; j++) {
-        source->matrix[i][j] -= factor * source->matrix[k][j];
+void s21_initialize_matrix(matrix_t *source, double start, double step) {
+  if (!s21_is_valid_matrix_full(source)) {
+    double current_value = start;
+    for (int i = 0; i < source->rows; i++) {
+      for (int j = 0; j < source->columns; j++) {
+        source->matrix[i][j] = current_value;
+        current_value += step;
       }
     }
   }
-  return OK;
 }
 
-/**
- * @brief находит произведение элементов главной диагонали матрицы
- *
- * @param source структура с исходной матрицей (matrix_t *)
- * @return результат вычисления (double)
- */
-double s21_main_diagonal_multiple(const matrix_t *source) {
-  double result = 1.0;
-  for (int i = 0; i < source->rows && result != 0.0; i++)
-    if (source->matrix[i][i] == 0.0) result = 0.0;
-  for (int i = 0; i < source->rows && result != 0.0; i++)
-    result *= source->matrix[i][i];
-  return result;
-}
-
-//////////////////функции для отладки///////////////////////////
-/**
- * @brief вывод на экран матрицы
- *
- * @param source исходная матрица
- */
-void s21_print_matrix(const matrix_t *source) {
-  if (!s21_is_valid_matrix_midi(source)) {
-    for (int i = 0; i < source->rows; i++) {
-      for (int j = 0; j < source->columns; j++)
-        printf("%-10f\t", source->matrix[i][j]);
-      printf("\n");
-    }
-  }
-}
+////////////архивные функции////////////////////////////////
 
 // /**
 //  * @brief корректирует индекс (концепция бесконечной склейки)
@@ -393,22 +337,6 @@ void s21_print_matrix(const matrix_t *source) {
 //   return err_code;
 // }
 
-/**
- * @brief заполняет матрицу псевдослучайными числами
- *
- * @param source исходная матрица
- */
-void s21_initialize_matrix_random(matrix_t *source, int shift) {
-  srand(shift);
-  if (!s21_is_valid_matrix_full(source)) {
-    for (int i = 0; i < source->rows; i++) {
-      for (int j = 0; j < source->columns; j++) {
-        source->matrix[i][j] = rand() % 10000 / 100.0;
-      }
-    }
-  }
-}
-
 // /**
 //  * @brief проверяет равенство двух чисел с заданной точностью
 //  *
@@ -438,25 +366,87 @@ void s21_initialize_matrix_random(matrix_t *source, int shift) {
 //   for (int i = 0; i < A->rows && result == SUCCESS; i++) {
 //     for (int j = 0; j < A->columns && result == SUCCESS; j++) {
 //       result = s21_eq_element(A->matrix[i][j], B->matrix[i][j]);
-//       // printf("s21_eq_content.cpr: %f --- %f\n", A->matrix[i][j], B->matrix[i][j]);
+//       // printf("s21_eq_content.cpr: %f --- %f\n", A->matrix[i][j],
+//       B->matrix[i][j]);
 //     }
 //   }
 //   // printf("s21_eq_content.result_after_cmp: %d\n", result);
 //   return result;
 // }
 
-// int s21_determinant(matrix_t *A, double *result) {
+// /**
+//  * @brief рассчитывает минор (определитель субматрицы, т.е. усеченной по
+//  * выбранным строке и столбцу)
+//  *
+//  * @param source структура с исходной матрицей (matrix_t *)
+//  * @param row выбранная строка (int)
+//  * @param column выбранный столбец (int)
+//  * @param result структура с исходной матрицей (double *)
+//  * @return код ошибки (int)
+//  * @retval 0 - OK.
+//  * @retval 1 - INCORRECT_MATRIX.
+//  * @retval 2 - CALCULATION_ERROR.
+//  */
+// int s21_get_minor(const matrix_t *source, int row, int column, double
+// *result) {
+//   double determinant = 0.0;
+//   matrix_t sub_matrix = {0};
+//   int err_code =
+//       s21_create_sub_matrix(source, row, column, source->rows - 1,
+//       &sub_matrix);
+//   if (err_code == OK) err_code = s21_determinant(&sub_matrix, &determinant);
+//   s21_remove_matrix(&sub_matrix);
+//   if (err_code == OK) err_code = s21_is_valid_element(determinant);
+//   if (err_code == OK) *result = determinant;
+//   return err_code;
+// }
+// /**
+//  * @brief создает субматрицу, за исключением указанного столбца и строки
+//  *
+//  * @param source исходная матрица (matrix_t *)
+//  * @param row_del строка заданного элемента исходной матрицы (int)
+//  * @param column_del столбец заданного элемента исходной матрицы (int)
+//  * @param size разрер субматрицы матрицы (int)
+//  * @param result указатель результат (*result)
+//  * @return код ошибки (int)
+//  */
+// int s21_create_sub_matrix(const matrix_t *source, int row_del, int
+// column_del,
+//                           int size, matrix_t *result) {
+//   int err_code = s21_create_matrix(size, size, result);
+//   if (err_code == OK) {
+//     for (int row_src = 0, row_res = 0; row_src <= size; row_src++) {
+//       if (row_src == row_del) continue;
+//       for (int column_src = 0, column_res = 0; column_src <= size;
+//            column_src++) {
+//         if (column_src == column_del) continue;
+//         result->matrix[row_res][column_res] =
+//             source->matrix[row_src][column_src];
+//         column_res++;
+//       }
+//       row_res++;
+//     }
+//   }
+//   return err_code;
+// }
+
+// /// @brief расчитывает определитель методом гаусса (через произведение
+// элементов главной диагонали треугольной матрицы)
+// /// @param A иходная матрица (matrix_t *)
+// /// @param result результат (double *)
+// /// @return код результат
+// int s21_determinant_gausse(matrix_t *A, double *result) {
 //   double res = 0.0;
 //   matrix_t temp = {0};
 
 //   int err_code = (result == NULL) ? INCORRECT_MATRIX : OK;
 //   if (err_code == OK) *result = 0.0;
 //   if (err_code == OK) err_code = s21_is_valid_matrix_full(A);
-  // if (err_code == OK) err_code = s21_squar_size(A);
+//   if (err_code == OK) err_code = s21_squar_size(A);
 //   if (err_code == OK) {
 //     if (A->rows == 1) res = A->matrix[0][0];
-//     else if (A->rows == 2) res = A->matrix[0][0] * A->matrix[1][1] - A->matrix[1][0] * A->matrix[0][1];
-//     else {
+//     else if (A->rows == 2) res = A->matrix[0][0] * A->matrix[1][1] -
+//     A->matrix[1][0] * A->matrix[0][1]; else {
 //       err_code = s21_copy_matrix(A, &temp);
 //       s21_gauss_elimination(&temp);
 //       res = s21_main_diagonal_multiple(&temp);
@@ -465,5 +455,118 @@ void s21_initialize_matrix_random(matrix_t *source, int shift) {
 //   }
 //   if (err_code == OK) err_code = s21_is_valid_element(res);
 //   if (err_code == OK) *result = res;
+//   return err_code;
+// }
+
+// /**
+//  * @brief проверяет что матрица квадратная
+//  *
+//  * @param source указатель на проверяемую матрицу (matrix_t *)
+//  * @return результат проверки (int)
+//  * @retval 0 - OK.
+//  * @retval 1 - INCORRECT_MATRIX.
+//  * @retval 2 - CALCULATION_ERROR.
+//  */
+// int s21_squar_size(const matrix_t *source) {
+//   return (source->rows != source->columns) ? CALCULATION_ERROR : OK;
+// }
+
+// /**
+//  * @brief создает копию матрицы
+//  *
+//  * @param source структура с исходной матрицей (matrix_t *)
+//  * @param result структура с исходной матрицей (matrix_t *)
+//  * @return код ошибки (int)
+//  * @retval 0 - OK.
+//  * @retval 1 - INCORRECT_MATRIX.
+//  * @retval 2 - CALCULATION_ERROR.
+//  */
+// int s21_copy_matrix(const matrix_t *source, matrix_t *result) {
+//   int err_code = s21_create_matrix(source->rows, source->rows, result);
+//   if (err_code == OK)
+//     for (int i = 0; i < source->rows; i++) {
+//       for (int j = 0; j < source->rows; j++) {
+//         result->matrix[i][j] = source->matrix[i][j];
+//       }
+//     }
+//   return err_code;
+// }
+
+// /**
+//  * @brief преобразует матрицу методом гауса в треугольную
+//  *
+//  * @param source структура с исходной матрицей (matrix_t *)
+//  * @return код ошибки (int)
+//  * @retval 0 - OK.
+//  * @retval 1 - INCORRECT_MATRIX.
+//  * @retval 2 - CALCULATION_ERROR.
+//  */
+// int s21_gauss_elimination(const matrix_t *source) {
+//   for (int k = 0; k < source->rows - 1; k++) {
+//     for (int i = k + 1; i < source->rows; i++) {
+//       double factor = source->matrix[i][k] / source->matrix[k][k];
+//       for (int j = k; j < source->rows; j++) {
+//         source->matrix[i][j] -= factor * source->matrix[k][j];
+//       }
+//     }
+//   }
+//   return OK;
+// }
+
+// /**
+//  * @brief находит произведение элементов главной диагонали матрицы
+//  *
+//  * @param source структура с исходной матрицей (matrix_t *)
+//  * @return результат вычисления (double)
+//  */
+// double s21_main_diagonal_multiple(const matrix_t *source) {
+//   double result = 1.0;
+//   for (int i = 0; i < source->rows && result != 0.0; i++)
+//     if (source->matrix[i][i] == 0.0) result = 0.0;
+//   for (int i = 0; i < source->rows && result != 0.0; i++)
+//     result *= source->matrix[i][i];
+//   return result;
+// }
+// int s21_calc_complements(matrix_t *A, matrix_t *result) {
+//   double value;
+//   int err_code = s21_is_valid_result_ptr(result);
+//   if (err_code == OK) err_code = s21_is_valid_matrix_full(A);
+//   if (err_code == OK) err_code = s21_squar_size(A);
+//   if (err_code == OK) err_code = s21_create_matrix(A->rows, A->columns,
+//   result); if (err_code == OK) {
+//     if (A->rows == 1) result->matrix[0][0] = 1;
+//     else
+//       for (int i = 0; i < A->rows && err_code == OK; i++) {
+//         for (int j = 0; j < A->columns && err_code == OK; j++) {
+//           err_code = s21_get_minor(A, i, j, &value);
+//           if (err_code == OK) result->matrix[i][j] = value * pow(-1, i + j);
+//         }
+//       }
+//   }
+//   return err_code;
+// }
+
+// int s21_inverse_matrix(matrix_t *A, matrix_t *result) {
+//   double determinant = 0;
+//   int err_code = s21_is_valid_result_ptr(result);
+//   if (err_code == OK) err_code = s21_is_valid_matrix_full(A);
+//   if (err_code == OK) err_code = s21_squar_size(A);
+//   if (err_code == OK) err_code = s21_determinant(A, &determinant);
+//   if (err_code == OK && determinant == 0) err_code = CALCULATION_ERROR;
+//   if (err_code == OK) {
+//     if (A->rows == 1) {
+//       err_code = s21_create_matrix(1, 1, result);
+//       if (err_code == OK) result->matrix[0][0] = 1 / A->matrix[0][0];
+//     } else {
+//       matrix_t complements = {0};
+//       matrix_t transposed_complements = {0};
+//       err_code = s21_calc_complements(A, &complements);
+//       if (err_code == OK) err_code = s21_transpose(&complements,
+//       &transposed_complements); if (err_code == OK) err_code =
+//       s21_mult_number(&transposed_complements, 1 / determinant, result); if
+//       (err_code == OK) s21_remove_matrix(&complements); if (err_code == OK)
+//       s21_remove_matrix(&transposed_complements);
+//     }
+//   }
 //   return err_code;
 // }

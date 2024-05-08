@@ -10,5 +10,8 @@
             "database": "postgres",
             "username": "postgres"
         }
-    ]
+    ],
+    "files.associations": {
+        "__locale": "c"
+    }
 }

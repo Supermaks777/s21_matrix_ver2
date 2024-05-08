@@ -54,10 +54,11 @@ double s21_main_diagonal_multiple(const matrix_t *source);
 int s21_gauss_elimination(const matrix_t *source);
 void s21_initialize_matrix_random(matrix_t *source, int shift);
 int get_determinant(matrix_t *A, double *determinant);
-void calc_minor_matrix(matrix_t *A, int row, int column, matrix_t *M);
-int calc_minor_determinant(matrix_t *A, double *determinant);
+void get_minor_matrix(matrix_t *A, int row, int column, matrix_t *M);
+int get_minor_determinant(matrix_t *A, double *determinant);
 int valid_matrix(matrix_t *source);
+int valid_eq_matrixes(matrix_t *A, matrix_t *B);
 int get_calc_complements(matrix_t *A, matrix_t *result);
-
+int s21_determinant_gausse(matrix_t *A, double *result);
 
 #endif

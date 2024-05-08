@@ -817,7 +817,6 @@ START_TEST(complements_4) {
   ck_assert_int_eq(res2, 0);
   ck_assert_int_eq(res, 0);
 
-
   s21_remove_matrix(&A);
   s21_remove_matrix(&B);
   s21_remove_matrix(&C);
