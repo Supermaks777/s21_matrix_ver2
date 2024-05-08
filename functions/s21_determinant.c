@@ -10,24 +10,18 @@
  * @retval 2 - CALCULATION_ERROR.
  */
 int s21_determinant(matrix_t *A, double *result) {
-  double res = 0.0;
-  matrix_t temp = {0};
-
-  int err_code = (result == NULL) ? INCORRECT_MATRIX : OK;
-  if (err_code == OK) *result = 0.0;
-  if (err_code == OK) err_code = s21_is_valid_matrix_full(A);
-  if (err_code == OK) err_code = s21_squar_size(A);
-  if (err_code == OK) {
-    if (A->rows == 1) res = A->matrix[0][0];
-    else if (A->rows == 2) res = A->matrix[0][0] * A->matrix[1][1] - A->matrix[1][0] * A->matrix[0][1];
-    else {
-      err_code = s21_copy_matrix(A, &temp);
-      s21_gauss_elimination(&temp);
-      res = s21_main_diagonal_multiple(&temp);
-      if (err_code == OK) s21_remove_matrix(&temp);
+  int err_code = OK;
+  if (A != NULL && A->matrix != NULL && A->rows > 0 && A->columns > 0) {
+    if (A->rows == A->columns) {
+      *result = 0.0;
+      err_code = get_determinant(A, result);
+    } else {
+      err_code = CALCULATION_ERROR;
     }
+  } else {
+    err_code = INCORRECT_MATRIX;
   }
-  if (err_code == OK) err_code = s21_is_valid_element(res);
-  if (err_code == OK) *result = res;
+
   return err_code;
 }
+

@@ -53,5 +53,9 @@ int s21_copy_matrix(const matrix_t *source, matrix_t *result);
 double s21_main_diagonal_multiple(const matrix_t *source);
 int s21_gauss_elimination(const matrix_t *source);
 void s21_initialize_matrix_random(matrix_t *source, int shift);
+int get_determinant(matrix_t *A, double *determinant);
+void calc_minor_matrix(matrix_t *A, int row, int column, matrix_t *M);
+int calc_minor_determinant(matrix_t *A, double *determinant);
+
 
 #endif

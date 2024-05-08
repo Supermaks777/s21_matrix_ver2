@@ -199,6 +199,62 @@ int s21_is_valid_result_ptr(const matrix_t *source) {
   return (source == NULL) ? INCORRECT_MATRIX : OK;
 }
 
+/// @brief рассчитывает определитель заданной матрицы
+/// @param A указатель на исходную матрицу
+/// @param determinant указатель на итоговое значение
+/// @return код ошибки (int)
+///@retval 0 - OK.
+///@retval 1 - INCORRECT_MATRIX.
+///@retval 2 - CALCULATION_ERROR.
+int get_determinant(matrix_t *A, double *determinant) {
+  int err_code = OK;
+
+  if (A->columns == 1 && A->rows == 1) *determinant = A->matrix[0][0];
+  else if (A->columns == 2 && A->rows == 2) *determinant = A->matrix[0][0] * A->matrix[1][1] - A->matrix[1][0] * A->matrix[0][1];
+  else {
+    for (int j = 0; j < A->columns && err_code == OK; j++) {
+      double det_minor_j = 0.0;
+      matrix_t M_j = {0};
+
+      err_code = s21_create_matrix(A->rows - 1, A->columns - 1, &M_j);
+      if (err_code == OK) {
+        calc_minor_matrix(A, 0, j, &M_j);
+        err_code = calc_minor_determinant(&M_j, &det_minor_j);
+        if (err_code == OK) *determinant += pow(-1.0, 1 + (j + 1)) * A->matrix[0][j] * det_minor_j;
+      }
+      s21_remove_matrix(&M_j);
+    }
+  }
+  return err_code;
+}
+
+
+void calc_minor_matrix(matrix_t *source, int row, int column, matrix_t *result) {
+  int minor_row = 0, minor_col = 0;
+
+  for (int i = 0; i < source->rows; i++) {
+    if (i == row) continue;
+    minor_col = 0;
+    for (int j = 0; j < source->columns; j++) {
+      if (j != column) {
+        result->matrix[minor_row][minor_col] = source->matrix[i][j];
+        minor_col++;
+      }
+    }
+    minor_row++;
+  }
+}
+
+int calc_minor_determinant(matrix_t *A, double *determinant) {
+  int err_code = OK;
+  if (A != NULL && A->matrix != NULL && A->rows > 0 && A->columns > 0) {
+    if (A->rows == 1 && A->columns == 1) *determinant = A->matrix[0][0];
+    else if (A->rows == 2 && A->columns == 2) *determinant = A->matrix[0][0] * A->matrix[1][1] - A->matrix[0][1] * A->matrix[1][0];
+    else err_code = get_determinant(A, determinant);
+  } else err_code = INCORRECT_MATRIX;
+  return err_code;
+}
+
 /**
  * @brief создает копию матрицы
  *
@@ -232,8 +288,6 @@ int s21_copy_matrix(const matrix_t *source, matrix_t *result) {
 int s21_gauss_elimination(const matrix_t *source) {
   for (int k = 0; k < source->rows - 1; k++) {
     for (int i = k + 1; i < source->rows; i++) {
-      // double factor = source->matrix[k][k] == 0.0 ? 0.0 :
-      // source->matrix[i][k] / source->matrix[k][k];
       double factor = source->matrix[i][k] / source->matrix[k][k];
       for (int j = k; j < source->rows; j++) {
         source->matrix[i][j] -= factor * source->matrix[k][j];
@@ -259,20 +313,20 @@ double s21_main_diagonal_multiple(const matrix_t *source) {
 }
 
 //////////////////функции для отладки///////////////////////////
-// /**
-//  * @brief вывод на экран матрицы
-//  *
-//  * @param source исходная матрица
-//  */
-// void s21_print_matrix(const matrix_t *source) {
-//   if (!s21_is_valid_matrix_midi(source)) {
-//     for (int i = 0; i < source->rows; i++) {
-//       for (int j = 0; j < source->columns; j++)
-//         printf("%-10f\t", source->matrix[i][j]);
-//       printf("\n");
-//     }
-//   }
-// }
+/**
+ * @brief вывод на экран матрицы
+ *
+ * @param source исходная матрица
+ */
+void s21_print_matrix(const matrix_t *source) {
+  if (!s21_is_valid_matrix_midi(source)) {
+    for (int i = 0; i < source->rows; i++) {
+      for (int j = 0; j < source->columns; j++)
+        printf("%-10f\t", source->matrix[i][j]);
+      printf("\n");
+    }
+  }
+}
 
 // /**
 //  * @brief корректирует индекс (концепция бесконечной склейки)
@@ -334,21 +388,21 @@ double s21_main_diagonal_multiple(const matrix_t *source) {
 //   return err_code;
 // }
 
-// /**
-//  * @brief заполняет матрицу псевдослучайными числами
-//  *
-//  * @param source исходная матрица
-//  */
-// void s21_initialize_matrix_random(matrix_t *source, int shift) {
-//   srand(shift);
-//   if (!s21_is_valid_matrix_full(source)) {
-//     for (int i = 0; i < source->rows; i++) {
-//       for (int j = 0; j < source->columns; j++) {
-//         source->matrix[i][j] = rand() % 10000 / 100.0;
-//       }
-//     }
-//   }
-// }
+/**
+ * @brief заполняет матрицу псевдослучайными числами
+ *
+ * @param source исходная матрица
+ */
+void s21_initialize_matrix_random(matrix_t *source, int shift) {
+  srand(shift);
+  if (!s21_is_valid_matrix_full(source)) {
+    for (int i = 0; i < source->rows; i++) {
+      for (int j = 0; j < source->columns; j++) {
+        source->matrix[i][j] = rand() % 10000 / 100.0;
+      }
+    }
+  }
+}
 
 // /**
 //  * @brief проверяет равенство двух чисел с заданной точностью
@@ -384,4 +438,27 @@ double s21_main_diagonal_multiple(const matrix_t *source) {
 //   }
 //   // printf("s21_eq_content.result_after_cmp: %d\n", result);
 //   return result;
+// }
+
+// int s21_determinant(matrix_t *A, double *result) {
+//   double res = 0.0;
+//   matrix_t temp = {0};
+
+//   int err_code = (result == NULL) ? INCORRECT_MATRIX : OK;
+//   if (err_code == OK) *result = 0.0;
+//   if (err_code == OK) err_code = s21_is_valid_matrix_full(A);
+  // if (err_code == OK) err_code = s21_squar_size(A);
+//   if (err_code == OK) {
+//     if (A->rows == 1) res = A->matrix[0][0];
+//     else if (A->rows == 2) res = A->matrix[0][0] * A->matrix[1][1] - A->matrix[1][0] * A->matrix[0][1];
+//     else {
+//       err_code = s21_copy_matrix(A, &temp);
+//       s21_gauss_elimination(&temp);
+//       res = s21_main_diagonal_multiple(&temp);
+//       if (err_code == OK) s21_remove_matrix(&temp);
+//     }
+//   }
+//   if (err_code == OK) err_code = s21_is_valid_element(res);
+//   if (err_code == OK) *result = res;
+//   return err_code;
 // }
